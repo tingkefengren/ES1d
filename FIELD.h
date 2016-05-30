@@ -4,7 +4,7 @@
 class FIELD
 {
 public:
-	void field(double *Xj,double (**rhoj),double (**rhoji),double (**ej),double (**eji),double epsi,double dx,int t);
+	void field(double *Xj,double (**rhoj),double (**rhoji),double (**ej),double epsi,double dx,int t);
 };
 
 #endif

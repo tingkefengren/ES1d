@@ -9,7 +9,7 @@ using namespace std;
 #define N 5000
 #define G 128
 
-void FIELD::field(double *Xj,double (**rhoj),double (**rhoji),double (**ej),double (**eji),double epsi,double dx,int t)
+void FIELD::field(double *Xj,double (**rhoj),double (**rhoji),double (**ej),double epsi,double dx,int t)
 {
     //Define the variable.
     FFT fft;

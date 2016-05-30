@@ -1,6 +1,5 @@
 #include<stdlib.h>
 #include<fstream>
-#include<assert.h>
 #include<iostream>
 #define _USE_MATH_DEFINES
 #include<math.h>
@@ -12,8 +11,8 @@
 #include "MOVE.h"
 using namespace std;
 
-//Define variable
-//T--the totle time N--the totle number of the particles G--the totle number of the grids
+//Define const variable
+/*T--the totle time N--the totle number of the particles G--the totle number of the grids*/
 #define T 50
 #define N 60
 #define G 128
@@ -31,7 +30,6 @@ int main()
 	double (**rhoj);
 	double (**rhoji);
 	double (**ej);
-	double (**eji);
 	double q,m,c;
 	double a=3,b=8;
 	double dl,dx,dt;
@@ -46,7 +44,6 @@ int main()
 	rhoj=new double*[T];
 	rhoji=new double*[T];
 	ej=new double*[T];
-	eji=new double*[T];
 	Xj=new double[G];
 
 	for(int i=0;i!=T;++i)
@@ -59,11 +56,19 @@ int main()
 		rhoj[i]=new double[G];
 		rhoji[i]=new double[G];
 		ej[i]=new double[G];
-		eji[i]=new double[G];
 	}
 
+        /*xi--position of particle
+          vi--velocity of particle
+          ei--electrostatic of particle
+          ese--energy of particle
+          p--momenten of particle
+          rhoji--charge density of particle
+          rhoj--charge density of field
+          ej--electrostatic of field
+          Xj--position of grid*/
 
-	//Assignment
+	//Assignment   initial begining.
 	q=1.0;
 	m=1.0;
 	epsi=1.0;
@@ -77,7 +82,7 @@ int main()
 	{
 		for(int i=0;i!=N;++i)
 		{
-			//The particle number density is linear, and the gradient is 1/(5000*5000).
+			/*The particle number density is linear, and the gradient is 1/(5000*5000).*/
 			xi[a][i]=(i+1)/5001.0-(2500.0*i+2500.0-0.5*(1+i*i+2*i))/(5000.0*5000.0);
 			vi[a][i]=-0.0003;
 			ei[a][i]=0.0;
@@ -89,7 +94,7 @@ int main()
 			rhoj[a][j]=0.0;
 			rhoji[a][j]=0.0;
 			ej[a][j]=0.0;
-			eji[a][j]=0.0;
+			//eji[a][j]=0.0;
 		}
 	}
 
@@ -97,10 +102,11 @@ int main()
 	SETRHO rho;
 	rho.setrho(xi,Xj,rhoj,q,m,dx,0);
 
-	//Fields subroutine 
+	//Fields subroutine--fields for grid 
 	FIELD field;
-	field.field(Xj,rhoj,rhoji,ej,eji,epsi,dx,0);
+	field.field(Xj,rhoj,rhoji,ej,epsi,dx,0);
 
+        //Field for particle
 	for(int i=0;i!=N;++i)
 	{
 		for(int j=0;j!=(G-1);++j)
@@ -115,22 +121,21 @@ int main()
 	accel.accel(vi,ei,m,q,dt,dx,0);
 
 	//Write the data to the txt
-	fstream ES11("es1Result8x.txt", fstream::out);
-	//fstream ES12("es1Result8v.txt", fstream::out);
-	//fstream ES13("es1Result8p.txt", fstream::out);
-	//fstream ES14("es1Result8e.txt", fstream::out);
-        assert(ES11.is_open());
-	//assert(ES12.is_open());
-	//assert(ES13.is_open());
-	//assert(ES14.is_open());
+	ofstream ES11("es1Result8x.txt");
+	/*fstream ES12("es1Result8v.txt", fstream::out);
+	fstream ES13("es1Result8p.txt", fstream::out);
+	fstream ES14("es1Result8e.txt", fstream::out);
+	assert(ES12.is_open());
+	assert(ES13.is_open());
+	assert(ES14.is_open());*/
 
 	//Write the data of xi[0][5000] and vi[0][5000]
-	//ES12<<"vi[0][5000]"<<endl;
-	//for(int i=0;i!=N;++i)
-	//    ES12<<vi[0][i]<<" ";
-        //ES12<<endl;
+	/*ES12<<"vi[0][5000]"<<endl;
+	for(int i=0;i!=N;++i)
+	    ES12<<vi[0][i]<<" ";
+        ES12<<endl;*/
 
-	//ES11<<"xi[0][5000]"<<endl;
+	/*ES11<<"xi[0][5000]"<<endl;*/
 	for(int i=0;i!=N;++i)
 	    ES11<<xi[0][i]<<" ";
         ES11<<endl;
@@ -140,13 +145,15 @@ int main()
 	history.histry(vi,xi,ese,p,m,0);
 
 	//Write the data of ese[0][5000] and p[0][5000]
-	//ES14<<"ese[0][5000]"<<endl;
-	//for (int i=0;i!=N;++i)
-	//	ES14<<ese[0][i]<<endl;
+	/*ES14<<"ese[0][5000]"<<endl;
+	for (int i=0;i!=N;++i)
+		ES14<<ese[0][i]<<endl;
 
-	//ES13<<"p[0][5000]"<<endl;
-	//for(int i=0;i!=N;++i)
-	//	ES13<<p[0][i]<<endl;
+	ES13<<"p[0][5000]"<<endl;
+	for(int i=0;i!=N;++i)
+		ES13<<p[0][i]<<endl;*/
+
+        //initial ending
 
 	//The main loop
 	for(int t=1;t!=T;++t)
@@ -159,34 +166,35 @@ int main()
 		move.move(vi,xi,dt,dx,t);
 
 		//Write the data of xi[t][5000]and vi[t][5000] at the time t to the txt.
-		//ES12<<"vi[t][5000]"<<t*dt<<endl;
+		/*ES12<<"vi[t][5000]"<<t*dt<<endl;
 
-		//for(int i=0;i!=N;++i)
-		//	ES12<<vi[t][i]<<" ";
-                //ES12<<endl;
+		for(int i=0;i!=N;++i)
+	        	ES12<<vi[t][i]<<" ";
+                ES12<<endl;*/
 
-		//ES11<<"xi[t][5000]"<<t*dt<<endl;
+		/*ES11<<"xi[t][5000]"<<t*dt<<endl;*/
 		for(int i=0;i!=N;++i)
 		    ES11<<xi[t][i]<<" ";
                 ES11<<endl;
+                ES11.close();
 
 		//Setrho subroutine--recaculate the electic density of the grid.
 		rho.setrho(xi,Xj,rhoj,q,m,dx,t);
 
 		//History subroutine--write the data which is change with the time.
 		history.histry(vi,xi,ese,p,m,t);
-        //ES14<<"ese[t][5000]"<<t*dt<<endl;
+                /*ES14<<"ese[t][5000]"<<t*dt<<endl;
 
-		//for(int i=0;i!=N;++i)
-		//	ES14<<ese[t][i]<<endl;
+		for(int i=0;i!=N;++i)
+			ES14<<ese[t][i]<<endl;
 		
-		//ES13<<"p[t][5000]"<<t*dt<<endl;
+		ES13<<"p[t][5000]"<<t*dt<<endl;
 
-		//for(int i=0;i!=N;++i)
-		//	ES13<<p[t][i]<<endl;
+		for(int i=0;i!=N;++i)
+			ES13<<p[t][i]<<endl;*/
 
 		//Field subroutine--caculate the electric field intensity via the electric density of the grid.
-		field.field(Xj,rhoj,rhoji,ej,eji,epsi,dx,t);
+		field.field(Xj,rhoj,rhoji,ej,epsi,dx,t);
 
 		//Caculate the electric field intensity of each particle.
 		for(int i=0;i!=N;++i)
@@ -210,7 +218,7 @@ int main()
 		delete []rhoj[i];
 		delete []rhoji[i];
 		delete []ej[i];
-		delete []eji[i];
+		//delete []eji[i];
 	}
 	delete []Xj;
 	delete []xi;
@@ -221,7 +229,7 @@ int main()
 	delete []rhoj;
 	delete []rhoji;
 	delete []ej;
-	delete []eji;
+	//delete []eji;
 
 	return 0;
 }
