@@ -2,7 +2,7 @@
 #include "HISTORY.h"
 using namespace std;
 
-#define N 60
+#define N 1000
 
 void HISTORY::histry(double (**vi),double (**xi),double (**ese),double (**p),double m,int t)
 {
