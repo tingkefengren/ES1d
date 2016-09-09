@@ -1,13 +1,16 @@
 #ifndef CLASSFFT_H
 #define CLASSFFT_H
 
+#include<complex>
+#include<valarray>
+typedef std::complex<double> Complex;
+typedef std::valarray<Complex> CArray; 
+
 class FFT
 {
 public:
-	void changeOrder(double (**rhok),double (**rhoki),int n,int t);
-	void FFT_1D(double (**rhoj),double (**rhoji),double (**rhok),double (**rhoki), int len,int t);
-	void IFFT_1D(double (**phik),double (**phiki),double (**phij),double (**phiji),int len,int t);
-
+	void fft(CArray& x);
+	void ifft(CArray& x);
 };
 #endif
 

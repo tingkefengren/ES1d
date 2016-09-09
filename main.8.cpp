@@ -3,6 +3,7 @@
 #include<iostream>
 #define _USE_MATH_DEFINES
 #include<math.h>
+#include<time.h>
 #include "HISTORY.h"
 #include "SETRHO.h"
 #include "FFT.h"
@@ -11,15 +12,24 @@
 #include "MOVE.h"
 using namespace std;
 
-//Define const variable
-/*T--the totle time N--the totle number of the particles G--the totle number of the grids*/
-#define T 50
-#define N 60
-#define G 128
+double uniform_dist(double imin,double imax){
+	int temp;
+	while ((temp=rand()) == RAND_MAX){
+	    ;
+	 }
+	return ((double) temp / RAND_MAX*(imax-imin)+imin);
+}
 
 //The main
 int main()
 {
+//Define const variable
+/*T--the totle time N--the totle number of the particles G--the totle number of the grids*/
+	const int T=500;
+	const int N=1000;
+	const int G=128;
+
+	double uniform_dist(double imin,double imax);
 	//Define the pointer to pointer
 	double (**xi);
 	double (**vi);
@@ -30,10 +40,10 @@ int main()
 	double (**rhoj);
 	double (**rhoji);
 	double (**ej);
-	double q,m,c;
-	double a=3,b=8;
-	double dl,dx,dt;
-	double epsi;
+
+	double q,m,l;
+	double dx,dt;
+	double epsi,w_p;
 
 	//The memory allocation of the pointer to pointer on the stock
 	xi=new double*[T];
@@ -71,31 +81,36 @@ int main()
 	//Assignment   initial begining.
 	q=1.0;
 	m=1.0;
+	l=0.01;
 	epsi=1.0;
-	dl=1/127.0;
-	dx=1/127.0;
-	c=pow(a,b);
-	dt=dx/c;
+	dx=l/G;
+	w_p=pow((N/l)*q*q/(epsi*m),0.5);
+	dt=0.1*2*M_PI/w_p;
+
 	for(int j=0;j!=G;++j)
-		Xj[j]=j*dl;
-	for(int a=0;a!=T;++a)
+		Xj[j]=j*dx;
+	for(int t=0;t!=T;++t)
 	{
 		for(int i=0;i!=N;++i)
 		{
-			/*The particle number density is linear, and the gradient is 1/(5000*5000).*/
-			xi[a][i]=(i+1)/5001.0-(2500.0*i+2500.0-0.5*(1+i*i+2*i))/(5000.0*5000.0);
-			vi[a][i]=-0.0003;
-			ei[a][i]=0.0;
-			ese[a][i]=0.0;
-			p[a][i]=0.0;
+			xi[t][i]=0;
+			vi[t][i]=0;
+			ei[t][i]=0.0;
+			ese[t][i]=0.0;
+			p[t][i]=0.0;
 		}
 		for(int j=0;j!=G;++j)
 		{
-			rhoj[a][j]=0.0;
-			rhoji[a][j]=0.0;
-			ej[a][j]=0.0;
-			//eji[a][j]=0.0;
+			rhoj[t][j]=0.0;
+			rhoji[t][j]=0.0;
+			ej[t][j]=0.0;
 		}
+	}
+
+	srand((unsigned)time(NULL));
+	for(int i=0;i!=N;++i){
+		xi[0][i]=uniform_dist(0,1);
+		vi[0][i]=2*pow(10,1);
 	}
 
 	//Setrho subroutine
@@ -106,13 +121,22 @@ int main()
 	FIELD field;
 	field.field(Xj,rhoj,rhoji,ej,epsi,dx,0);
 
+	ofstream E_J("ej.txt");
+	for(int j=0;j!=G;++j)
+		E_J<<ej[0][j]<<" ";
+	E_J<<endl;
+
         //Field for particle
 	for(int i=0;i!=N;++i)
 	{
-		for(int j=0;j!=(G-1);++j)
+		for(int j=0;j!=G;++j)
 		{
-			if((xi[0][i]>=Xj[j])&&(xi[0][i]<=Xj[j+1]))
-			ei[0][i]=((Xj[j+1]-xi[0][i])/dx)*ej[0][j]+((xi[0][i]-Xj[j])/dx)*ej[0][j+1];
+			if(j==G-1)
+				if((xi[0][i]>=Xj[j])&&(xi[0][i]<Xj[j]+dx))
+					ei[0][i]=((Xj[j]+dx-xi[0][i])/dx)*ej[0][j]+((xi[0][i]-Xj[j])/dx)*ej[0][0];
+			else
+				if((xi[0][i]>=Xj[j])&&(xi[0][i]<Xj[j+1]))
+					ei[0][i]=((Xj[j+1]-xi[0][i])/dx)*ej[0][j]+((xi[0][i]-Xj[j])/dx)*ej[0][j+1];
 		}
 	}
 
@@ -121,37 +145,16 @@ int main()
 	accel.accel(vi,ei,m,q,dt,dx,0);
 
 	//Write the data to the txt
-	ofstream ES11("es1Result8x.txt");
-	/*fstream ES12("es1Result8v.txt", fstream::out);
-	fstream ES13("es1Result8p.txt", fstream::out);
-	fstream ES14("es1Result8e.txt", fstream::out);
-	assert(ES12.is_open());
-	assert(ES13.is_open());
-	assert(ES14.is_open());*/
-
-	//Write the data of xi[0][5000] and vi[0][5000]
-	/*ES12<<"vi[0][5000]"<<endl;
-	for(int i=0;i!=N;++i)
-	    ES12<<vi[0][i]<<" ";
-        ES12<<endl;*/
+	ofstream X_I("xi.txt");
 
 	/*ES11<<"xi[0][5000]"<<endl;*/
 	for(int i=0;i!=N;++i)
-	    ES11<<xi[0][i]<<" ";
-        ES11<<endl;
+	    X_I<<xi[0][i]<<" ";
+        X_I<<endl;
 
 	//History subroutine
 	HISTORY history;
 	history.histry(vi,xi,ese,p,m,0);
-
-	//Write the data of ese[0][5000] and p[0][5000]
-	/*ES14<<"ese[0][5000]"<<endl;
-	for (int i=0;i!=N;++i)
-		ES14<<ese[0][i]<<endl;
-
-	ES13<<"p[0][5000]"<<endl;
-	for(int i=0;i!=N;++i)
-		ES13<<p[0][i]<<endl;*/
 
         //initial ending
 
@@ -166,47 +169,44 @@ int main()
 		move.move(vi,xi,dt,dx,t);
 
 		//Write the data of xi[t][5000]and vi[t][5000] at the time t to the txt.
-		/*ES12<<"vi[t][5000]"<<t*dt<<endl;
-
-		for(int i=0;i!=N;++i)
-	        	ES12<<vi[t][i]<<" ";
-                ES12<<endl;*/
 
 		/*ES11<<"xi[t][5000]"<<t*dt<<endl;*/
 		for(int i=0;i!=N;++i)
-		    ES11<<xi[t][i]<<" ";
-                ES11<<endl;
-                ES11.close();
+		    X_I<<xi[t][i]<<" ";
+                X_I<<endl;
 
 		//Setrho subroutine--recaculate the electic density of the grid.
 		rho.setrho(xi,Xj,rhoj,q,m,dx,t);
 
 		//History subroutine--write the data which is change with the time.
 		history.histry(vi,xi,ese,p,m,t);
-                /*ES14<<"ese[t][5000]"<<t*dt<<endl;
 
-		for(int i=0;i!=N;++i)
-			ES14<<ese[t][i]<<endl;
-		
-		ES13<<"p[t][5000]"<<t*dt<<endl;
-
-		for(int i=0;i!=N;++i)
-			ES13<<p[t][i]<<endl;*/
 
 		//Field subroutine--caculate the electric field intensity via the electric density of the grid.
 		field.field(Xj,rhoj,rhoji,ej,epsi,dx,t);
 
+		for(int j=0;j!=G;++j)
+			E_J<<ej[t][j]<<" ";
+		E_J<<endl;
+
 		//Caculate the electric field intensity of each particle.
 		for(int i=0;i!=N;++i)
 		{
-			for(int j=0;j!=(G-1);++j)
+			for(int j=0;j!=G;++j)
 			{
-				if((xi[t][i]>=Xj[j])&&(xi[t][i]<=Xj[j+1]))
-				ei[t][i]=((Xj[j+1]-xi[t][i])/dx)*ej[t][j]+((xi[t][i]-Xj[j])/dx)*ej[t][j+1];
+				if(j==G-1)
+					if((xi[0][i]>=Xj[j])&&(xi[0][i]<Xj[j]+dx))
+						ei[0][i]=((Xj[j]+dx-xi[0][i])/dx)*ej[0][j]+((xi[0][i]-Xj[j])/dx)*ej[0][0];
+				else
+					if((xi[0][i]>=Xj[j])&&(xi[0][i]<Xj[j+1]))
+						ei[0][i]=((Xj[j+1]-xi[0][i])/dx)*ej[0][j]+((xi[0][i]-Xj[j])/dx)*ej[0][j+1];
 			}
 		}
 	}
 
+	X_I.close();
+	E_J.close();
+	
 	//After the use of the pointer, release the memory of the stock.
 	for(int i=0;i!=T;++i)
 	{
@@ -218,7 +218,6 @@ int main()
 		delete []rhoj[i];
 		delete []rhoji[i];
 		delete []ej[i];
-		//delete []eji[i];
 	}
 	delete []Xj;
 	delete []xi;
@@ -229,7 +228,6 @@ int main()
 	delete []rhoj;
 	delete []rhoji;
 	delete []ej;
-	//delete []eji;
 
 	return 0;
 }

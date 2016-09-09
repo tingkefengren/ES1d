@@ -2,7 +2,7 @@
 #include "ACCEL.h"
 using namespace std;
 
-#define N 60
+#define N 1000
 
 void ACCEL::accel(double (**vi),double (**ei),double m,double q,double dt,double dx,int t)
 {
