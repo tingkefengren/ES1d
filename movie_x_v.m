@@ -1,12 +1,13 @@
 %getframe
 clear
-x=load('xi.txt');
+xi=load('xi.txt');
+vi=load('vi.txt');
 count=1;
-for i=1:1:5000
+for i=1:1:50
 
 %    contour(1:33, 1:33, real(phi(:,:,i)),20);
 
-	plot(x(i,:),'.');
+	plot(xi(i,:),vi(i,:),'.');
 
 	axesValue = axis ;
 
@@ -19,7 +20,7 @@ for i=1:1:5000
 end
 
 % making movie
-myObj = VideoWriter('trace_x.avi');%初始化一个avi文件
+myObj = VideoWriter('trace_x_v.avi');%初始化一个avi文件
 
 myObj.FrameRate = 5;
 

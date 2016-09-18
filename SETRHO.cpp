@@ -2,8 +2,8 @@
 #include "SETRHO.h"
 using namespace std;
 
-#define N 1000
-#define G 128
+extern const int N;
+extern const int G;
 
 void SETRHO::setrho(double (**xi),double *Xj,double (**rhoj),double q,double m,double dx,int t)
 {
@@ -20,7 +20,7 @@ void SETRHO::setrho(double (**xi),double *Xj,double (**rhoj),double q,double m,d
 			}
 			else if(j==G-1){
 				if((xi[t][i]>=Xj[j])&&(xi[t][i]<Xj[j]+dx)){
-					rhoj[t][j]=rhoj[t][j]+q*(Xj[j+1]-xi[t][i])/dx;
+					rhoj[t][j]=rhoj[t][j]+q*(Xj[j]+dx-xi[t][i])/dx;
 					rhoj[t][0]=rhoj[t][0]+q*(xi[t][i]-Xj[j])/dx;
 				}
 			}
