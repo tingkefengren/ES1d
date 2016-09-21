@@ -4,7 +4,7 @@ using namespace std;
 
 extern const int N;
 
-void HISTORY::histry(double (**vi),double (**xi),double (**ese),double (**p),double m,int t)
+void HISTORY::history(double (**vi),double (**xi),double (**ese),double (**p),double m,int t)
 {
     for(int i=0;i!=N;++i)
 	{

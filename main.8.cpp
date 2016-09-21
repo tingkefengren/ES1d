@@ -12,10 +12,11 @@
 #include "MOVE.h"
 using namespace std;
 
-extern const int T=50;
-extern const int N=1000;
-extern const int G=128;
+extern const int T=50;		//T--the totle time steps
+extern const int N=1000;	//N--the totle number of the particles
+extern const int G=128;		//G--the totle number of the grids
 
+//The uniform distribution
 double uniform_dist(double imin,double imax){
 	int temp;
 	while ((temp=rand()) == RAND_MAX){
@@ -24,34 +25,33 @@ double uniform_dist(double imin,double imax){
 	return ((double) temp / RAND_MAX*(imax-imin)+imin);
 }
 
+//The maxiwell distribution
 double maxwell_dist(double ava,double sig){
 	return sig*sqrt(-2.*log(uniform_dist(0,1)))*cos(M_PI*2.*uniform_dist(0,1))+ava;
 }
 
-
 //The main
-int main()
+int main(int argc,char *argv[])
 {
-//Define const variable
-/*T--the totle time N--the totle number of the particles G--the totle number of the grids*/
-
 	double uniform_dist(double imin,double imax);
 	double maxwell_dist(double ava,double sig);
 	//Define the pointer to pointer
-	double (**xi);
-	double (**vi);
-	double (**ei);
-	double (**p);
-	double (**ese);
-	double *Xj;
-	double (**rhoj);
-	double (**rhoji);
-	double (**ej);
+	double (**xi);			//xi--position of particle
+	double (**vi);			//vi--velocity of particle
+	double (**ei);                  //ei--electrostatic of particle
+	double (**p);                   //p--momenten of particle
+	double (**ese);                 //ese--energy of particle
+	double *Xj;                     //Xj--position of grid
+	double (**rhoj);                //rhoji--charge density of particle
+	double (**rhoji);               //rhoj--charge density of field
+	double (**ej);                  //ej--electrostatic of field
 
-	int n_0;
-	double q,m,l;
-	double dx,dt;
-	double epsi,w_p,v_0,v_T;
+	int n_0;			//n_0--the number of particle a superparticle certains
+	double q,m,epsi;		//q--charge of electron,m--mess of electron,epsi--permittivity
+	double l;			//l--length of the system
+	double dx,dt;			//dx--length of the grid,dt--time interval
+	double x_1,k_mode;		//x_1--amplitude of perturbation,k_mode--mode of perturbation
+	double w_p,v_0,v_T;		//w_p--plasma frequency,v_0--drift velocity,v_T--thermal velocity
 
 	//The memory allocation of the pointer to pointer on the stock
 	xi=new double*[T];
@@ -76,31 +76,7 @@ int main()
 		ej[i]=new double[G];
 	}
 
-        /*xi--position of particle
-          vi--velocity of particle
-          ei--electrostatic of particle
-          ese--energy of particle
-          p--momenten of particle
-          rhoji--charge density of particle
-          rhoj--charge density of field
-          ej--electrostatic of field
-          Xj--position of grid*/
-
-	//Assignment   initial begining.
-	n_0=1000;	//the number of particle a superparticle certains
-	q=1.6e-19*n_0;
-	m=9.10938215e-31*n_0;
-	l=0.01;
-	epsi=8.854187817e-12;
-	v_0=0;
-	v_T=0;
-	dx=l/G;
-	w_p=pow((N/l)*q*q/(epsi*m),0.5);
-	dt=0.1*2*M_PI/w_p;
-
-	for(int j=0;j!=G;++j)
-		Xj[j]=j*dx;
-	for(int t=0;t!=T;++t)
+	for(int t=0;t!=T;++t)		//initial the pointer to pointer.
 	{
 		for(int i=0;i!=N;++i)
 		{
@@ -118,41 +94,51 @@ int main()
 		}
 	}
 
+	////////********initial begin********////////
+	n_0=1000;
+	q=1.6e-19*n_0;
+	m=9.10938215e-31*n_0;
+	epsi=8.854187817e-12;
+	l=0.01;
+	dx=l/G;
+	w_p=pow((N/l)*q*q/(epsi*m),0.5);
+	dt=0.1*2*M_PI/w_p;
+	v_0=0;
+	v_T=0;
+	x_1=0.1*dx*8;
+	k_mode=0;
+
+	for(int j=0;j!=G;++j)				//initial of grid
+		Xj[j]=j*dx;
+
 	srand((unsigned)time(NULL));
 	for(int i=0;i!=N;++i){
-		xi[0][i]=uniform_dist(0,l);
-		if(v_T==0)
+		xi[0][i]=uniform_dist(0,l);		//initial of xi
+		xi[0][i]+=x_1*cos(k_mode*xi[0][i]);	//plus the initial perturbation
+
+		if(xi[0][i]>=l)				//boundary condition
+			xi[0][i]-=l;
+		else if(xi[0][i]<0)
+			xi[0][i]+=l;
+
+		if(v_T==0)				//initial of vi
 			vi[0][i]=v_0;
 		else
-			//vi[0][i]=v_0+maxwell_dist(0,v_T);
 			vi[0][i]=maxwell_dist(0,v_T);
 	}
 
-	ofstream V_I("vi.txt");
-//	for(int i=0;i!=N;++i)
-//		V_I<<vi[0][i]<<" ";
-//	V_I<<endl;
-
-	ofstream RHO("rhoj.txt");
-	//Setrho subroutine
-	SETRHO rho;
+	SETRHO rho;					//Setrho subroutine
 	rho.setrho(xi,Xj,rhoj,q,m,dx,0);
-	for(int j=0;j!=G;++j)
-		RHO<<rhoj[0][j]<<" ";
-	RHO<<endl;
-	RHO.close();
 
-	//Fields subroutine--fields for grid 
-	FIELD field;
-	field.field(Xj,rhoj,rhoji,ej,epsi,dx,0);
+	FIELD field;					//Fields subroutine
+	field.field(Xj,rhoj,rhoji,ej,epsi,dx,0,argv[1],argv[2]);
 
 	ofstream E_J("ej.txt");
 	for(int j=0;j!=G;++j)
 		E_J<<ej[0][j]<<" ";
 	E_J<<endl;
 
-        //Field for particle
-	for(int i=0;i!=N;++i)
+	for(int i=0;i!=N;++i)				//Field for particle
 	{
 		for(int j=0;j!=G;++j)
 		{
@@ -165,45 +151,37 @@ int main()
 		}
 	}
 
-	//Setv subroutine
-	ACCEL accel;
+	ACCEL accel;					//Setv subroutine
 	accel.accel(vi,ei,m,q,dt,dx,0);
 
-	for(int i=0;i!=N;++i)
+	ofstream V_I("vi.txt");
+	for(int i=0;i!=N;++i)				//Write the data to the txt
 		V_I<<vi[0][i]<<" ";
 	V_I<<endl;
 
-	//Write the data to the txt
 	ofstream X_I("xi.txt");
-
-	/*ES11<<"xi[0][5000]"<<endl;*/
 	for(int i=0;i!=N;++i)
 		X_I<<xi[0][i]<<" ";
         X_I<<endl;
 
-	//History subroutine
-	HISTORY history;
-	history.histry(vi,xi,ese,p,m,0);
+	HISTORY history;				//History subroutine
+	history.history(vi,xi,ese,p,m,0);
+        ////////********initial end********////////
 
-        //initial ending
-
-	//The main loop
+	////////********The main loop begin********////////
 	for(int t=1;t!=T;++t)
 	{   
-		//Accel subroutine--accel the particle and change the data of vi[t][5000]
+		//Accel subroutine--accel the particle and change the data of vi[t][N]
 		accel.accel(vi,ei,m,q,dt,dx,t);
 
 		for(int i=0;i!=N;++i)
 			V_I<<vi[t][i]<<" ";
 		V_I<<endl;
 
-		//Move subroutine--change the data of the xi[t][5000]
+		//Move subroutine--change the data of the xi[t][N]
 		MOVE move;
 		move.move(vi,xi,dt,dx,t,l);
 
-		//Write the data of xi[t][5000]and vi[t][5000] at the time t to the txt.
-
-		/*ES11<<"xi[t][5000]"<<t*dt<<endl;*/
 		for(int i=0;i!=N;++i)
 		    X_I<<xi[t][i]<<" ";
                 X_I<<endl;
@@ -212,11 +190,10 @@ int main()
 		rho.setrho(xi,Xj,rhoj,q,m,dx,t);
 
 		//History subroutine--write the data which is change with the time.
-		history.histry(vi,xi,ese,p,m,t);
-
+		history.history(vi,xi,ese,p,m,t);
 
 		//Field subroutine--caculate the electric field intensity via the electric density of the grid.
-		field.field(Xj,rhoj,rhoji,ej,epsi,dx,t);
+		field.field(Xj,rhoj,rhoji,ej,epsi,dx,t,argv[1],argv[2]);
 
 		for(int j=0;j!=G;++j)
 			E_J<<ej[t][j]<<" ";
@@ -236,8 +213,9 @@ int main()
 			}
 		}
 	}
+	////////********the main loop end********////////
 
-	X_I.close();
+	X_I.close();					//close the file
 	V_I.close();
 	E_J.close();
 	

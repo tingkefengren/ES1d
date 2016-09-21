@@ -2,7 +2,7 @@
 %将时域电场信号Ej(x,t)转变为频域谱信号Ek(k,w)
 %取波数平均——对谱信号取模，乘以相应的波数并积分（求和），再作归一化
 
-clear
+clear;
 G=128;
 T=50;
 N=1000;
@@ -25,33 +25,43 @@ ej_0=sum(ej')/G;
 t_i=0:dt:(t-dt);
 %t_i=t_i';
 x_i=0:dx:(l-dx);
-figure;
+figure;%('visible','off');
 mesh(x_i,t_i,ej);
 xlabel('x(m)');
 ylabel('t(s)');
 zlabel('E(V/m)');
-figure;
+%saveas(gcf,'ej_mesh.eps','epsc');
+figure;%('visible','off');
 contour(x_i,t_i,ej);
 xlabel('x(m)');
 ylabel('t(s)');
+%saveas(gcf,'ej_contour.eps','epsc');
 
-for K=-(G/2):1:(G/2-1)
-	k(K+G/2+1)=2*pi*K/l;	%波数
+for K=0:1:G-1
+	k(K+1)=2*pi*K/l;	%波数
 end
-for W=-(T/2):1:(T/2-1)
-	w(W+T/2+1)=2*pi*W/t;
+for W=0:1:T-1
+	w(W+1)=2*pi*W/t;
 end
 ek=fft2(ej);
 ek1=abs(ek);			%取模
-figure;
+for i=1:1:T
+	ek1(i,:)=ek1(i,:)-ek1(i,1);
+end
+for j=1:1:G
+	ek1(:,j)=ek1(:,j)-ek1(1,j);
+end
+figure;%('visible','off');
 mesh(k,w,ek1);
 xlabel('k(m-1)');
 ylabel('w(s-1)');
 zlabel('功率谱');
-figure;
+%saveas(gcf,'ek_mesh.eps','epsc');
+figure;%('visible','off');
 contour(k,w,ek1);
 xlabel('k(m-1)');
 ylabel('w(s-1)');
+%saveas(gcf,'ek_contour.eps','epsc');
 %for j=1:1:128
 %	ek2_1(j)=0;
 %	ek2_2(j)=0;
