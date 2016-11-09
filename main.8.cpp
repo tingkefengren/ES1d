@@ -12,8 +12,8 @@
 #include "MOVE.h"
 using namespace std;
 
-extern const int T=50;		//T--the totle time steps
-extern const int N=1000;	//N--the totle number of the particles
+extern const int T=500;		//T--the totle time steps
+extern const int N=1000000;	//N--the totle number of the particles
 extern const int G=128;		//G--the totle number of the grids
 
 //The uniform distribution
@@ -104,8 +104,8 @@ int main(int argc,char *argv[])
 	w_p=pow((N/l)*q*q/(epsi*m),0.5);
 	dt=0.1*2*M_PI/w_p;
 	v_0=0;
-	v_T=0;
-	x_1=0.1*dx*8;
+	v_T=500;
+	x_1=0.1*dx*1000;
 	k_mode=0;
 
 	for(int j=0;j!=G;++j)				//initial of grid
@@ -114,7 +114,7 @@ int main(int argc,char *argv[])
 	srand((unsigned)time(NULL));
 	for(int i=0;i!=N;++i){
 		xi[0][i]=uniform_dist(0,l);		//initial of xi
-		xi[0][i]+=x_1*cos(k_mode*xi[0][i]);	//plus the initial perturbation
+		xi[0][i]+=x_1*cos(2*M_PI*k_mode*xi[0][i]/l);	//plus the initial perturbation
 
 		if(xi[0][i]>=l)				//boundary condition
 			xi[0][i]-=l;
