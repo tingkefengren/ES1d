@@ -4,7 +4,7 @@
 class SETRHO
 {
 public:
-	void setrho(double (**xi),double *Xj,double (**rhoj),double q,double m,double dx,int t);
+	void setrho(double *xi,double *Xj,double *rhoj,double q,double m,double dx,int t);
 };
 
 #endif

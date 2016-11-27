@@ -5,7 +5,7 @@ using namespace std;
 extern const int N;
 extern const int G;
 
-void SETRHO::setrho(double (**xi),double *Xj,double (**rhoj),double q,double m,double dx,int t)
+void SETRHO::setrho(double *xi,double *Xj,double *rhoj,double q,double m,double dx,int t)
 {
 	//Weighing the charge of the particle to the grid.
 	for(int j=0;j!=G;++j)
@@ -13,15 +13,15 @@ void SETRHO::setrho(double (**xi),double *Xj,double (**rhoj),double q,double m,d
 		for(int i=0;i!=N;++i)
 		{
 			if(j!=G-1){
-				if((xi[t][i]>=Xj[j])&&(xi[t][i]<Xj[j+1])){
-					rhoj[t][j]=rhoj[t][j]+q*(Xj[j+1]-xi[t][i])/dx;
-					rhoj[t][j+1]=rhoj[t][j+1]+q*(xi[t][i]-Xj[j])/dx;
+				if((xi[i]>=Xj[j])&&(xi[i]<Xj[j+1])){
+					rhoj[j]=rhoj[j]+q*(Xj[j+1]-xi[i])/dx;
+					rhoj[j+1]=rhoj[j+1]+q*(xi[i]-Xj[j])/dx;
 				}
 			}
 			else if(j==G-1){
-				if((xi[t][i]>=Xj[j])&&(xi[t][i]<Xj[j]+dx)){
-					rhoj[t][j]=rhoj[t][j]+q*(Xj[j]+dx-xi[t][i])/dx;
-					rhoj[t][0]=rhoj[t][0]+q*(xi[t][i]-Xj[j])/dx;
+				if((xi[i]>=Xj[j])&&(xi[i]<Xj[j]+dx)){
+					rhoj[j]=rhoj[j]+q*(Xj[j]+dx-xi[i])/dx;
+					rhoj[0]=rhoj[0]+q*(xi[i]-Xj[j])/dx;
 				}
 			}
 		}

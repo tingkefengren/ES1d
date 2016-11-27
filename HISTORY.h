@@ -4,7 +4,7 @@
 class HISTORY
 {
 public:
-	void history(double (**vi),double (**xi),double (**ese),double (**p),double m,int t);
+	void history(double *vi,double *xi,double *ese,double *p,double m,int t);
 };
 
 #endif

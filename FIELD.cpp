@@ -12,7 +12,7 @@ typedef std::valarray<Complex> CArray;
 
 extern const int G;
 
-void FIELD::field(double *Xj,double (**rhoj),double (**rhoji),double (**ej),double epsi,double dx,int t,char *argv1,char *argv2)
+void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t,char *argv1,char *argv2)
 {
 	double a1=atoi(argv1);			//a1--compensation factor
 	double a2=atoi(argv2);			//a2--smoothing factor
@@ -38,7 +38,7 @@ void FIELD::field(double *Xj,double (**rhoj),double (**rhoji),double (**ej),doub
 
 	Complex *rhok=new Complex[G];		//caculate the rhok[G] via rhoj[G].
 	for(int j=0;j!=G;++j)
-		rhok[j]=rhoj[t][j];
+		rhok[j]=rhoj[j];
 	CArray data(rhok,G);
 	FFT fft;				//fft subroutine
 	fft.fft(data);
@@ -61,11 +61,11 @@ void FIELD::field(double *Xj,double (**rhoj),double (**rhoji),double (**ej),doub
 	for(int j=0;j!=G;++j)			//caculate the ej[t][128] via phij[t][128].
 	{
 		if(j==0)
-			ej[t][j]=(phij[G-1]-phij[j+1])/(2*dx);
+			ej[j]=(phij[G-1]-phij[j+1])/(2*dx);
 		else if(j==G-1)
-			ej[t][j]=(phij[j-1]-phij[0])/(2*dx);
+			ej[j]=(phij[j-1]-phij[0])/(2*dx);
 		else
-		    ej[t][j]=(phij[j-1]-phij[j+1])/(2*dx);
+		    ej[j]=(phij[j-1]-phij[j+1])/(2*dx);
 	}
 	
 	delete []rhok;				//after the use of the pointer, release the memory on the stack.
