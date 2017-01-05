@@ -13,8 +13,42 @@ public:
 	void ifft(CArray& x);
 };
 #endif
+void FFT::fft(CArray& x)
+{
+	const size_t N = x.size();
+	if (N <= 1) return;
+
+	// divide
+	CArray even = x[std::slice(0, N/2, 2)];
+	CArray  odd = x[std::slice(1, N/2, 2)];
+
+	// conquer
+	fft(even);
+	fft(odd);
+
+	// combine
+	for (size_t i = 0; i < N/2; ++i)
+	{
+		Complex t = std::polar(1.0, -2 * M_PI * i / N) * odd[i];
+		x[i    ] = even[i] + t;
+		x[i+N/2] = even[i] - t;
+	}
+}
+
+// inverse fft (in-place)
+void FFT::ifft(CArray& x)
+{
+	// conjugate the complex numbers
+	x= x.apply(std::conj);
+
+	// forward fft
+	fft( x );
+
+	// conjugate the complex numbers again
+	x = x.apply(std::conj);
+
+	// scale the numbers
+	x /= x.size();
+}
 
 
-//对类中的成员及成员函数参数的选取尚不了解，对类成员，成员函数的关系及外界参数与它们的关系尚不了解。
-//在类中，public成员函数将作为外部的接口，而public成员函数可以调用private中的成员，类中的成员函数也可以相互调用。
-//所以private中的成员的选取，可以是除调用类时输入与输出的中间变量，如果没有想要写的private成员，private一行也可以不写。

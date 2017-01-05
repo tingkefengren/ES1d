@@ -4,8 +4,8 @@
 class FIELD
 {
 public:
-	void field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t,char *argv1,char *argv2);
-	//void field2(double (**rhoj),double (**ej),double epsi,double dx,int t);
+	void field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t,double a1,double a2);
+	void get_ei(double *Xj,double *xi,double *ej,double *ei,double dx);
 };
 
 #endif

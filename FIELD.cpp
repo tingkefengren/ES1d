@@ -1,5 +1,7 @@
 #include<iostream>
 #include<fstream>
+#include<complex>
+#include<valarray>
 #include<stdlib.h>
 #include "FIELD.h"
 #include "FFT.h"
@@ -10,19 +12,21 @@ using namespace std;
 typedef std::complex<double> Complex;
 typedef std::valarray<Complex> CArray;
 
-extern const int G;
+extern int G;
+extern int N;
 
-void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t,char *argv1,char *argv2)
+void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t,double a1,double a2)
 {
-	double a1=atoi(argv1);			//a1--compensation factor
-	double a2=atoi(argv2);			//a2--smoothing factor
 	double k[G];				//k--wave number
 	double sm[G];				//sm--smoothing function
 	double ksqi[G];				//ksqi--1/epsi*(sm/(k*sin(kdx/2)/(kdx/2)))^2
 
 	for(int j=0;j!=G;++j)			//assignment
 	{
-		k[j]=2*M_PI/(G*dx)*j;
+		if(j<G/2)
+			k[j]=2*M_PI/(G*dx)*j;
+		else
+			k[j]=2*M_PI/(G*dx)*(j-G);
 		sm[j]=0;
 		ksqi[j]=0;
 	}
@@ -73,4 +77,15 @@ void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t
 	delete []phij;
 }
 
+void FIELD::get_ei(double *Xj,double *xi,double *ej,double *ei,double dx)
+{
+	int j=0;
+	for(int i=0;i!=N;++i){
+		j=(int)(xi[i]/dx);
+		if(j==G-1)
+			ei[i]=((Xj[j]+dx-xi[i])/dx)*ej[j]+((xi[i]-Xj[j])/dx)*ej[0];
+		else
+			ei[i]=((Xj[j+1]-xi[i])/dx)*ej[j]+((xi[i]-Xj[j])/dx)*ej[j+1];
+	}
+}
 

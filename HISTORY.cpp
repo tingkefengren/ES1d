@@ -2,7 +2,7 @@
 #include "HISTORY.h"
 using namespace std;
 
-extern const int N;
+extern int N;
 
 void HISTORY::history(double *vi,double *xi,double *ese,double *p,double m,int t)
 {
