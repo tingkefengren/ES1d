@@ -5,7 +5,7 @@ using namespace std;
 extern int N;
 extern int G;
 
-void SETRHO::setrho(double *xi,double *Xj,double *rhoj,double q,double n_0,double dx,int t)
+void SETRHO::setrho(double *xi,double *Xj,double *rhoj,double q,double n_0,double dx,int t,double ion_rho)
 {
 	//Weighing the charge of the particle to the grid.
 	int j=0;
@@ -21,6 +21,7 @@ void SETRHO::setrho(double *xi,double *Xj,double *rhoj,double q,double n_0,doubl
 				rhoj[0]=rhoj[0]+q*n_0*(xi[i]-Xj[j])/dx;
 		}
 	}
-	for(int j=0;j!=G;++j)
-		rhoj[j]=rhoj[j]/dx;
+	for(int j=0;j!=G;++j){
+		rhoj[j]=(rhoj[j]+ion_rho)/dx;
+	}
 }

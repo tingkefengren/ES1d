@@ -6,41 +6,65 @@ clear;
 T=200;
 G=2048;
 N=178000;
-n_r=1.78e13;
-q_r=1.6e-19;
+n_r=1.78e15;
+q_r=-1.6e-19;
 m_r=9.10938215e-31;
 epsi_r=8.854187817e-12;
-v_T_r=1e6;
-v_0=0;
-k_mode=100;
+v_T_r=0;
+v_0_r=1e6;
+k_mode=4;
 step_save=1;
 normalize=0;
+reactive_f_s=0;
 
 w_p_r=(n_r*q_r^2/(epsi_r*m_r))^0.5;
 if v_T_r==0
-	lambda_r=0.02*v_0/w_p_r;
+	lambda_r=0.01*v_0_r/w_p_r;
 else
 	lambda_r=v_T_r/w_p_r;
 end
 dx_r=lambda_r;
-l_r=G*dx_r;
-x_mode=l_r/(40*k_mode);
+l_r=dx_r*G;
 n_0=n_r*l_r/N;
+x_mode=0.5*l_r/(40*k_mode);
+
 omega_r=(w_p_r^2+1.5*(2*pi*k_mode/l_r)^2*v_T_r^2)^0.5;
-dt_r=0.05*2*pi/w_p_r;
+omega_f_r=2*pi*k_mode/l_r*v_0_r+w_p_r;
+omega_s_r=2*pi*k_mode/l_r*v_0_r-w_p_r;
+if v_T_r==0
+	%if reactive_f_s==1
+	%	dt_r=0.4*2*pi/omega_f_r;
+	%elseif reactive_f_s==0
+	%	dt_r=0.005*2*pi/omega_s_r;
+	%end
+	dt_r=0.05*2*pi/w_p_r;
+else
+	dt_r=0.04*2*pi/omega_r;
+end
 t_r=dt_r*T;
-dx_r=lambda_r;
 
 if normalize==1
 	q=1;
 	m=1;
 	v_T=1;
+	v_0=v_0_r/v_T_r;
 	l=l_r/lambda_r;
 	n=n_r*lambda_r;
 	epsi=epsi_r*m_r*lambda_r*w_p_r^2/q_r^2;
 	w_p=(n*q^2/(epsi*m))^0.5;
 	omega=(w_p^2+1.5*(2*pi*k_mode/l)^2*v_T^2)^0.5;
-	dt=0.05*2*pi/w_p;
+	omega_f=2*pi*k_mode/l*v_0+w_p;
+	omega_s=2*pi*k_mode/l*v_0-w_p;
+	if v_T==0
+		%if reactive_f_s==1
+		%	dt=0.4*2*pi/omega_f;
+		%elseif reactive_f_s==0
+		%	dt=0.005*2*pi/omega_s;
+		%end		
+		dt=0.05*2*pi/w_p;
+	else
+		dt=0.04*2*pi/omega;
+	end
 	t=dt*T;
 	dx=v_T/w_p;
 	G=2^(ceil(log2(l/dx)));
@@ -49,11 +73,14 @@ elseif normalize==0
 	q=q_r;
 	m=m_r;
 	v_T=v_T_r;
+	v_0=v_0_r;
 	l=l_r;
 	n=n_r;
 	epsi=epsi_r;
 	w_p=w_p_r;
 	omega=omega_r;
+	omega_f=omega_f_r;
+	omega_s=omega_s_r;
 	dt=dt_r;
 	t=dt*T;
 	dx=dx_r;
@@ -117,7 +144,7 @@ figure;%('visible','off');
 mesh(k,f,ek1);
 %surf(k2,w,ek2);
 xlabel({'$k(m^{-1})$'},'Interpreter','latex');
-ylabel({'$f (s^{-1})$'},'Interpreter','latex');
+ylabel({'$\omega (s^{-1})$'},'Interpreter','latex');
 zlabel({'power spectrum'},'Interpreter','latex');
 title({'The Power Spectrum of Electirc Field'},'Interpreter','latex');
 %%saveas(gcf,'ek_mesh.eps','epsc');
@@ -126,7 +153,7 @@ figure;%('visible','off');
 %contourf(k1,w,ek2);
 contourf(k,f,ek1);
 xlabel({'$k(m^{-1})$'},'Interpreter','latex');
-ylabel({'$f (s^{-1})$'},'Interpreter','latex');
+ylabel({'$\omega (s^{-1})$'},'Interpreter','latex');
 title({'The Power Spectrum of Electirc Field'},'Interpreter','latex');
 colormap(cool);
 
