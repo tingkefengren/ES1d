@@ -1,11 +1,13 @@
 #include<iostream>
 #include<stdlib.h>
+#include<vector>
 #include "MOVE.h"
 using namespace std;
 
 extern int N;
 
-void MOVE::move(double *vi,double *xi,double dt,double dx,int t,double l)
+void MOVE::move(vector<double> &vi,vector<double> &xi,double &dt,double &dx,int &t,double &l)
+//void MOVE::move(double *vi,double *xi,double dt,double dx,int t,double l)
 {
 	for(int i=0;i!=N;++i)
 	{

@@ -1,16 +1,20 @@
-a.out: main.o HISTORY.o SETRHO.o FIELD.o ACCEL.o MOVE.o
-	g++ -g main.o HISTORY.o SETRHO.o FIELD.o ACCEL.o MOVE.o -o a.out -llua -ldl
-main.o: main.cpp HISTORY.h SETRHO.h FIELD.h ACCEL.h MOVE.h
-	g++ -g -c main.cpp
+a.out: main.o HISTORY.o SETRHO.o FIELD.o ACCEL.o MOVE.o INIT.o INPUT.o
+	mpic++ -g main.o HISTORY.o SETRHO.o FIELD.o ACCEL.o MOVE.o INIT.o INPUT.o -o a.out ../lib/liblua.a -llua -ldl
+main.o: main.cpp HISTORY.h SETRHO.h FIELD.h ACCEL.h MOVE.h INIT.h INPUT.h
+	mpic++ -g -c main.cpp
 HISTORY.o: HISTORY.cpp HISTORY.h
-	g++ -g -c HISTORY.cpp
+	mpic++ -g -c HISTORY.cpp
 SETRHO.o: SETRHO.cpp SETRHO.h
-	g++ -g -c SETRHO.cpp
+	mpic++ -g -c SETRHO.cpp
 FIELD.o: FIELD.cpp FIELD.h FFT.h
-	g++ -g -c FIELD.cpp
+	mpic++ -g -c FIELD.cpp
 ACCEL.o: ACCEL.cpp ACCEL.h
-	g++ -g -c ACCEL.cpp
+	mpic++ -g -c ACCEL.cpp
 MOVE.o: MOVE.cpp MOVE.h
-	g++ -g -c MOVE.cpp
+	mpic++ -g -c MOVE.cpp
+INIT.o: INIT.cpp INIT.h
+	mpic++ -g -c INIT.cpp
+INPUT.o: INPUT.cpp INPUT.h
+	mpic++ -g -c INPUT.cpp
 clean:
 	rm *.o a.out

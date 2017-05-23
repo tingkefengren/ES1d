@@ -1,5 +1,6 @@
 #include<iostream>
 #include<fstream>
+#include<vector>
 #include<complex>
 #include<valarray>
 #include<stdlib.h>
@@ -15,7 +16,8 @@ typedef std::valarray<Complex> CArray;
 extern int G;
 extern int N;
 
-void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t,double a1,double a2)
+void FIELD::field(vector<double> &Xj,vector<double> &rhoj,vector<double> &ej,double &epsi,double &dx,int &t,double &a1,double &a2)
+//void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t,double a1,double a2)
 {
 	double k[G];				//k--wave number
 	double sm[G];				//sm--smoothing function
@@ -33,9 +35,10 @@ void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t
 
 	for(int j=0;j!=G;++j)			//caculate the smooting function sm and ksqi
 	{
-		sm[j]=exp(a1*sin(k[j]*dx/2)*sin(k[j]*dx/2)-a2*tan(k[j]*dx/2)*tan(k[j]*dx/2)*tan(k[j]*dx/2)*tan(k[j]*dx/2));
+		//sm[j]=exp(a1*sin(k[j]*dx/2)*sin(k[j]*dx/2)-a2*tan(k[j]*dx/2)*tan(k[j]*dx/2)*tan(k[j]*dx/2)*tan(k[j]*dx/2));
 		if(k[j]!=0)
-			ksqi[j]=sm[j]*sm[j]/(epsi*k[j]*k[j]*(sin(k[j]*dx/2)/(k[j]*dx/2))*(sin(k[j]*dx/2)/(k[j]*dx/2)));
+			//ksqi[j]=sm[j]*sm[j]/(epsi*k[j]*k[j]*(sin(k[j]*dx/2)/(k[j]*dx/2))*(sin(k[j]*dx/2)/(k[j]*dx/2)));
+			ksqi[j]=1.0/(epsi*k[j]*k[j]*(sin(k[j]*dx/2)/(k[j]*dx/2))*(sin(k[j]*dx/2)/(k[j]*dx/2)));
 		else if(k[j]==0)
 			ksqi[j]=1.0/(epsi*1);
 	}
@@ -77,10 +80,11 @@ void FIELD::field(double *Xj,double *rhoj,double *ej,double epsi,double dx,int t
 	delete []phij;
 }
 
-void FIELD::get_ei(double *Xj,double *xi,double *ej,double *ei,double dx)
+void FIELD::get_ei(int &my_rank,int &group_size,vector<double> &Xj,vector<double> &xi,vector<double> &ej,vector<double> &ei,double &dx)
+//void FIELD::get_ei(int my_rank,int group_size,double *Xj,double *xi,double *ej,double *ei,double dx)
 {
 	int j=0;
-	for(int i=0;i!=N;++i){
+	for(int i=my_rank*group_size;i!=(my_rank+1)*group_size;++i){
 		j=(int)(xi[i]/dx);
 		if(j==G-1)
 			ei[i]=((Xj[j]+dx-xi[i])/dx)*ej[j]+((xi[i]-Xj[j])/dx)*ej[0];
