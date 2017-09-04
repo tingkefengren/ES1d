@@ -1,6 +1,8 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
+#include<time.h>
+#include<math.h>
 #include<stdlib.h>
 #include "INIT.h"
 #include "INPUT.h"
@@ -36,8 +38,37 @@ void INIT::initial(vector<double> &Xj,vector<double> &xi,vector<double> &vi,Inpu
 	//	xi[i+N-N%G]=uniform_dist(0,l_r);
 
 	double v_T_beam=0.3*input_p->v_T;
-	for(int i=0;i!=N;++i)
-		xi[i]=uniform_dist(0,input_p->l);		//initial of xi
+	if(input_p->linear_dist==0){
+		for(int i=0;i!=N;++i)
+			xi[i]=uniform_dist(0,input_p->l);		//initial of xi
+	}
+	else if(input_p->linear_dist==1){
+		double a,b,criterion,imax,imin,slope;
+		imin=input_p->b_linear_dist;
+		imax=input_p->e_linear_dist;
+		slope=input_p->slope_linear_dist;
+		a=0.5*slope;
+		b=(1-0.5*slope*(imax*imax-imin*imin))/(imax-imin);
+		criterion=slope*imin+b;
+		if(slope>0){
+			criterion=slope*imin+b;
+			if(criterion<0){
+				cerr<<"The probability of the variable must be larger than 0"<<endl;
+				exit(1);
+			}
+		}
+		else if(slope<0){
+			criterion=slope*imax+b;
+			if(criterion<0){
+				cerr<<"The probability of the variable must be larger than 0"<<endl;
+				exit(1);
+				throw criterion;
+			}
+		}
+
+		for(int i=0;i!=N;++i)
+			xi[i]=linear_dist(a,b,input_p->b_linear_dist,input_p->e_linear_dist,input_p->slope_linear_dist);
+	}
 
 	if(input_p->local_perturb==1){
 		for(int i=0;i!=N;++i){
@@ -52,10 +83,20 @@ void INIT::initial(vector<double> &Xj,vector<double> &xi,vector<double> &vi,Inpu
 			if(input_p->v_T==0)				//initial of vi
 				vi[i]=input_p->v_0;
 			else{
-				if(i%20==0)
-					vi[i]=maxwell_dist(input_p->v_0,v_T_beam);
-				else
+				if(input_p->different_dist_v_instability==0)
 					vi[i]=maxwell_dist(0,input_p->v_T);
+				else if(input_p->different_dist_v_instability==1){
+					if(i%20==0)
+						vi[i]=maxwell_dist(input_p->v_0,v_T_beam);
+					else
+						vi[i]=maxwell_dist(0,input_p->v_T);
+				}
+				else if(input_p->different_dist_v_instability==2){
+					if(i%2==0)
+						vi[i]=maxwell_dist(input_p->v_0,input_p->v_T);
+					else
+						vi[i]=maxwell_dist(-input_p->v_0,input_p->v_T);
+				}
 			}
 			V_00<<vi[i]<<" ";
 		}
@@ -74,10 +115,20 @@ void INIT::initial(vector<double> &Xj,vector<double> &xi,vector<double> &vi,Inpu
 			if(input_p->v_T==0)				//initial of vi
 				vi[i]=input_p->v_0;
 			else{
-				if(i%20==0)
-					vi[i]=maxwell_dist(input_p->v_0,v_T_beam);
-				else
+				if(input_p->different_dist_v_instability==0)
 					vi[i]=maxwell_dist(0,input_p->v_T);
+				else if(input_p->different_dist_v_instability==1){
+					if(i%20==0)
+						vi[i]=maxwell_dist(input_p->v_0,v_T_beam);
+					else
+						vi[i]=maxwell_dist(0,input_p->v_T);
+				}
+				else if(input_p->different_dist_v_instability==2){
+					if(i%2==0)
+						vi[i]=maxwell_dist(input_p->v_0,input_p->v_T);
+					else
+						vi[i]=maxwell_dist(-input_p->v_0,input_p->v_T);
+				}
 			}
 			V_00<<vi[i]<<" ";
 
@@ -109,6 +160,12 @@ double INIT:: maxwell_dist(double mean,double sigma)
 		return maxwell_dist(mean,sigma);
 	else
 		return y;
+}
+
+double INIT::linear_dist(double a,double b,double imin,double imax,double slope){
+	double c;
+	c=-0.5*slope*imin*imin-b*imin-uniform_dist(0,1);
+	return ((-b+sqrt(b*b-4*a*c))/(2*a));
 }
 
 //The maxiwell distribution

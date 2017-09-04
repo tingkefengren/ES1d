@@ -12,6 +12,7 @@ public:
 	//void initial(double *Xj,double *xi,double *vi,double dx_r,double l_r,double x_mode,double k_mode,int local_perturb,double b_position_perturb,double e_position_perturb,double v_0_r,double v_T_r);
 	double uniform_dist(double imin,double imax);
 	double maxwell_dist(double mean,double sigma);
+	double linear_dist(double a,double b,double imin,double imax,double slope);
 	//double INIT::maxwell_dist(double ava,double sig)
 };
 

@@ -116,7 +116,11 @@ int main(int argc,char* argv[])
 	FIELD field;					//Fields subroutine
 	int t=0;
 	if(my_rank==0){
-		field.field(Xj,rhoj,ej,input_p.epsi,input_p.dx,t,input_p.a1,input_p.a2);	//get recent ej[1][j]. ej[0][j]=0
+		if(input_p.field_model==0)
+			field.field_fft(Xj,rhoj,ej,input_p.epsi,input_p.dx,t,input_p.a1,input_p.a2);	//get recent ej[1][j]. ej[0][j]=0
+		else if(input_p.field_model==1)
+			field.field_hockey(Xj,rhoj,ej,input_p.epsi,input_p.dx,t,input_p.a1,input_p.a2);	//get recent ej[1][j]. ej[0][j]=0
+			
 
 		if(t>=input_p.time_to_save_data){
 			for(int j=0;j!=G;++j)
@@ -234,7 +238,10 @@ int main(int argc,char* argv[])
 			history.history(vi,xi,ese,p,input_p.m,t);
 
 			//Field subroutine--caculate the electric field intensity via the electric density of the grid.
-			field.field(Xj,rhoj,ej,input_p.epsi,input_p.dx,t,input_p.a1,input_p.a2);
+			if(input_p.field_model==0)
+				field.field_fft(Xj,rhoj,ej,input_p.epsi,input_p.dx,t,input_p.a1,input_p.a2);
+			else if(input_p.field_model==1)
+				field.field_hockey(Xj,rhoj,ej,input_p.epsi,input_p.dx,t,input_p.a1,input_p.a2);
 
 			if(t>=input_p.time_to_save_data){
 				if(input_p.step_save!=0){

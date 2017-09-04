@@ -62,10 +62,13 @@ void INPUT::lua_to_cxx(Input_p *input_p)
 	input_p->normalize=lua_tonumber(L,-1);
 	lua_getglobal(L,"reactive_f_s");
 	input_p->reactive_f_s=lua_tonumber(L,-1);
+	lua_settop(L,0);
 	lua_getglobal(L,"perturb");
 	input_p->perturb=lua_tonumber(L,-1);
 	lua_getglobal(L,"local_perturb");
 	input_p->local_perturb=lua_tonumber(L,-1);
+	lua_getglobal(L,"field_model");
+	input_p->field_model=lua_tonumber(L,-1);
 	lua_getglobal(L,"b_position_perturb");
 	input_p->b_position_perturb=lua_tonumber(L,-1);
 	lua_getglobal(L,"e_position_perturb");
@@ -88,5 +91,15 @@ void INPUT::lua_to_cxx(Input_p *input_p)
 	input_p->n_0=lua_tonumber(L,-1);
 	lua_getglobal(L,"ion_rho");
 	input_p->ion_rho=lua_tonumber(L,-1);
+	lua_getglobal(L,"different_dist_v_instability");
+	input_p->different_dist_v_instability=lua_tonumber(L,-1);
+	lua_getglobal(L,"linear_dist");
+	input_p->linear_dist=lua_tonumber(L,-1);
+	lua_getglobal(L,"slope_linear_dist");
+	input_p->slope_linear_dist=lua_tonumber(L,-1);
+	lua_getglobal(L,"b_linear_dist");
+	input_p->b_linear_dist=lua_tonumber(L,-1);
+	lua_getglobal(L,"e_linear_dist");
+	input_p->e_linear_dist=lua_tonumber(L,-1);
 	lua_close(L);				//close the lua state
 }
